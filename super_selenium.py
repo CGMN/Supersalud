@@ -16,7 +16,7 @@ f= open("Archivo_de_error.txt","w")
 
 var=0
 
-#listado con los rut para ir iterand o__________
+#listado con los rut para ir ite rand o__________
 #root = tkinter.Tk()
 #root.withdraw()
 #file_path = tkinter.filedialog.askopenfilename()
