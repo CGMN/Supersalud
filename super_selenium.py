@@ -146,9 +146,9 @@ for i in range(0,len(RUT)):
 
         #fechas
         fechas=[]
-        print(espe[(pos_fechas[0]-2):(pos_fechas[0]+7)])
-        #fecha1=espe[espe[pos_fechas[0]:85]]
-        #print (fecha1)
+        for i in range(0, len(pos_fechas)):
+            fechas.append(espe[(pos_fechas[i]-2):(pos_fechas[i]+8)])
+        print(fechas)
 
 
         #agregar las fechas a las especialidades
