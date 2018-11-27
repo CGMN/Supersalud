@@ -25,9 +25,9 @@ print('Leyendo archivo de Ruts a consultar')
 df = pd.read_csv("Ruts_a_consultar.csv", encoding="latin1", low_memory = False)
 
 print('Creando lista de Rut')
-#RUT=[]
-#for i in df['RUT_FUNCIONARIO']:
-#   RUT.append(str(i))
+RUT=[]
+for i in df['RUT_FUNCIONARIO']:
+   RUT.append(str(i))
 
 
 print('Leyendo las especialidades')
@@ -38,13 +38,11 @@ especialidades=[]
 for i in df['Especialidades']:
    especialidades.append(str(i))
 
-
 browser = webdriver.Chrome()
 
-
-RUT=["6249403","7335462","15490509"]
+#RUT=["6249403","7335462","15490509"]
 print (len(RUT), 'Ruts a consultar')
-resultados=[]
+resultados=[['RUT','Titulo','Parrafo especialidad','Especialidad']]
 
 #varias especialidades
 #2637823-0
@@ -130,7 +128,7 @@ for i in range(0,len(RUT)):
         fechas_estandar=["/01/","/02/","/03/","/04/","/05/","/06/","/07/","/08/","/09/","/10/","/11/","/12/"]
 
         import re
-        pos_fechas=[]
+        pos_fechas=[]   #esta mal el orden
         for j in range(0,len(fechas_estandar)):
             for m in re.finditer(fechas_estandar[j], espe):
                 pos_fechas.append(m.start())
@@ -138,23 +136,26 @@ for i in range(0,len(RUT)):
         print ('pos fechas',pos_fechas)
 
         #determinar la ubicación de las especialidades
-        pos_especial=[]
+        pos_especial=[]  #esta mal el orden
         for j in range(0,len(especialidades)):
             for m in re.finditer(especialidades[j], espe):
                 pos_especial.append(m.start())
         print ('pos especialidades',pos_especial)
 
         #fechas
-        fechas=[]
+        fechas=[]  #esta mal el orden
         for i in range(0, len(pos_fechas)):
             fechas.append(espe[(pos_fechas[i]-2):(pos_fechas[i]+8)])
         print(fechas)
 
+        #Debo crear tuplas para las posiciones y fechas de modo de poder ordenarlas
 
         #agregar las fechas a las especialidades
+        #for i in range(0,len(pos_fechas)):
+        #    for j in range(0, len(pos_especial)):
+        #        if pos_fechas[i]>pos_especial[j]
 
-
-        resultados.append([rut_corto_sin_p_g,titulo,espe,espec_sin_signos])
+        resultados.append([rut_corto_sin_p_g,titulo,espe,espec_sin_signos,pos_especial,pos_fechas,fechas])
 
     except:
         var = traceback.format_exc()
@@ -175,7 +176,7 @@ f.close()
 
 
 browser.close()
-print ("cantidad de funcionarios consultados:", len(resultados))
+print ("cantidad de funcionarios consultados:", len(resultados)-1)
 
 #___________________________________________________________________________________
 
