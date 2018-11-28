@@ -38,15 +38,18 @@ especialidades=[]
 for i in df['Especialidades']:
    especialidades.append(str(i))
 
-browser = webdriver.Chrome()
 
-#RUT=["6249403","7335462","15490509"]
+#ignorando errores de certificacion
+options = webdriver.ChromeOptions()
+options.add_argument('--ignore-certificate-errors')
+options.add_argument('--ignore-ssl-errors')
+
+browser = webdriver.Chrome(chrome_options=options)
+
+#RUT=["6249403","7335462","15490509","5509946","12486951","7813596","15745523","2637823","1616681"]
 print (len(RUT), 'Ruts a consultar')
 resultados=[['RUT','Titulo','Parrafo especialidad','Especialidad']]
 
-#varias especialidades
-#2637823-0
-#1616681-2
 
 print('Realizando las consultas a la pagina web de la SuperIntendencia de salud')
 
@@ -98,6 +101,7 @@ for i in range(0,len(RUT)):
 
         especialidad=browser.find_element_by_xpath("/html/body/form/table/tbody/tr[2]/td/div/table/tbody/tr[13]/td").text
         espe=especialidad.replace("\n"," ")
+
         todas_espec=[]
 
         for i in range(0, len(especialidades)): #busca la especialidad en el texto
@@ -105,7 +109,7 @@ for i in range(0,len(RUT)):
                 todas_espec.append(str(especialidades[i]))
 
 
-        espec_sin_signos=','.join(todas_espec) #para que me salga en una sola celda al mandarlo al archivo
+
 
         #cambiar las fechas
         meses_dic = {" de Enero de ":"/01/", " de Febrero de ":"/02/"," de Marzo de ":"/03/"," de Abril de ":"/04/",
@@ -133,22 +137,40 @@ for i in range(0,len(RUT)):
             for m in re.finditer(fechas_estandar[j], espe):
                 pos_fechas.append(m.start())
 
-        print ('pos fechas',pos_fechas)
-
         #determinar la ubicación de las especialidades
         pos_especial=[]  #esta mal el orden
         for j in range(0,len(especialidades)):
             for m in re.finditer(especialidades[j], espe):
                 pos_especial.append(m.start())
-        print ('pos especialidades',pos_especial)
+
+        #quitando los duplicados como en Imagenología Oral y Maxilofacial, lo malo que hay algunos que si son doble
+
+
+
+
+
+
+
+
+
+
+
+
+
+        if len(pos_especial)==2 and pos_especial[0]-pos_especial[1]==0:
+            pos_especial.pop(1)
+            todas_espec.pop(1)
+
+        espec_sin_signos=','.join(todas_espec) #para que me salga en una sola celda al mandarlo al archivo
 
         #fechas
         fechas=[]  #esta mal el orden
         for i in range(0, len(pos_fechas)):
             fechas.append(espe[(pos_fechas[i]-2):(pos_fechas[i]+8)])
-        print(fechas)
+        #print(fechas)
 
         #Debo crear tuplas para las posiciones y fechas de modo de poder ordenarlas
+
 
         #agregar las fechas a las especialidades
         #for i in range(0,len(pos_fechas)):
