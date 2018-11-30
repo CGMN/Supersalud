@@ -8,7 +8,6 @@ import pandas as pd
 import numpy as np
 import tkinter.filedialog, re
 import time
-import dateutil.parser as dparser
 
 starttime =  time.time()
 
