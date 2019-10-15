@@ -1,3 +1,5 @@
+
+#<editor-fold #modulos
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -8,7 +10,9 @@ import csv
 import pandas as pd
 import numpy as np
 import time
-import pyperclip
+from selenium.webdriver.support import expected_conditions as EC
+#</editor-fold>#
+
 
 #ctrl+/ para comentarios
 
@@ -29,11 +33,11 @@ browser.set_window_size(980, 720)
 #rut=["14.285.470-8"]
 #rut=["13.450.412-9"]
 
-#rut=["6.249.403-4","1.616.681-2","14.285.470-8","15.312.391-8",
-#    "15.341.395-9","14.048.954-9","8.744.345-0","24.050.211-9","7.475.384-1"]
+# rut=["6.249.403-4","1.616.681-2","14.285.470-8","15.312.391-8",
+#     "15.341.395-9","14.048.954-9","8.744.345-0","24.050.211-9","7.475.384-1","26.246.649-3"]
 
 print('\nLeyendo archivo de Ruts a consultar')
-df = pd.read_csv("Ruts_a_consultar.csv", encoding="latin1", low_memory = False)
+df = pd.read_csv("Ruts_a_consultar_g.csv", encoding="latin1", low_memory = False)
 
 print('\nCreando lista de Rut')
 
@@ -146,30 +150,29 @@ for n in range(0, len(rut)):
         bb.send_keys('\n')
 
         #Esperar texto visible para copiar_______________________________________
-        from selenium.webdriver.support import expected_conditions as EC
 
-        wait = WebDriverWait(browser, 10)
-        element = wait.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '#main > div > div.fill.ng-scope > div > div > div.x_panel.col-12 > div > div:nth-child(2) > table > tbody > tr:nth-child(2) > td'),"Posee"))
+        sin_observaciones=[]
+        con_observaciones=[]
+
+        wait = WebDriverWait(browser, 1)
+
+        try:
+            if wait.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '#main > div > div.fill.ng-scope > div > div > div.x_panel.col-12 > div > div:nth-child(2) > table > tbody > tr:nth-child(2) > td'),"Posee"))==True:
+                sin_observaciones.append("1")
+        except:
+            con_observaciones.append("1")
+
         #________________________________________________________________________
 
         #copio el texto de la pagina web con el teclado
-        p2=browser.find_element_by_css_selector("body")
-        #time.sleep(0.5)
-        from ctypes import windll
-        if windll.user32.OpenClipboard(None):
-            windll.user32.EmptyClipboard()
-            windll.user32.CloseClipboard()
-        p2.send_keys(Keys.CONTROL+'a')
-        p2.send_keys(Keys.CONTROL+'c')
-        textocompleto=pyperclip.paste()
-        textocompleto=textocompleto.replace('\r','')
+        textocompleto=browser.find_element_by_css_selector("body").text
         #print(textocompleto)
 
         #para separar el str en una lista
         nuevo_textocompleto=texto_a_lista(textocompleto)
 
-        nuevo_textocompleto.pop(0) #quito el primer elemento por ser vacio
-        #print (nuevo_textocompleto)
+        #print("\n",nuevo_textocompleto)
+
         nuevo_textocompleto2=','.join(nuevo_textocompleto)
 
         #</editor-fold>#
@@ -200,6 +203,18 @@ for n in range(0, len(rut)):
         else:
             fecha_eunacom.append("0")
         fecha_eunacom2=','.join(fecha_eunacom)
+
+        #obteniendo año de la profesión en el extranjero
+        pos_agno_tit_prof=[]
+        if len(examen_en_texto)>0:
+            examen_en_texto_str=examen_en_texto[0]
+            pos_agno_tit_prof.append(examen_en_texto_str.index("Año"))
+
+        agno_tit_prof=[]
+        if len(examen_en_texto)>0:
+            agno_tit_prof.append(examen_en_texto_str[pos_agno_tit_prof[0]:pos_agno_tit_prof[0]+8])
+            #print (agno_tit_prof)
+
 
         #quitando de la pos anterior prof el eunacom
         if len(pos_texto_examen)>0:
@@ -250,7 +265,7 @@ for n in range(0, len(rut)):
 
         espe_fecha=[]
         for i in range(0, len(espe_limpia)):
-            espe_fecha.append((str(espe_limpia[i])+";"+str(fechas_espe[i])))
+            espe_fecha.append((str(espe_limpia[i])+"/"+str(fechas_espe[i])))
         espe_fecha2=','.join(espe_fecha)
 
         #</editor-fold>#
@@ -265,7 +280,7 @@ for n in range(0, len(rut)):
 
         if len(prof_eunacom)>0:
             resultados.append([rut[n],nacion,nuevo_textocompleto2,fecha_eunacom2,
-                len(prof_limpia),nuevo_prof_eunacom,len(espe_limpia),espe_fecha2])
+                len(prof_eunacom),nuevo_prof_eunacom,len(espe_limpia),espe_fecha2])
         else:
             resultados.append([rut[n],nacion,nuevo_textocompleto2,fecha_eunacom2,
                 len(prof_limpia),nueva_prof_fecha,len(espe_limpia),espe_fecha2])
@@ -290,7 +305,7 @@ browser.close()
 
 #escribir el archivo
 print("\nEscribiendo el archivo")
-with open("output.csv", "w",newline='') as f:
+with open("output_g.csv", "w",newline='') as f:
     writer = csv.writer(f)
     writer.writerows(resultados)
 print("\nArchivo listo")
